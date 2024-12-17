@@ -1,16 +1,18 @@
-import { AtpAgent } from '@atproto/api'
+import { type AtpAgent } from '@atproto/api'
 
-export default async function omegaBlock(agent: AtpAgent, targetHandle: string): Promise<boolean> {
+export default async function* omegaBlock(agent: AtpAgent, targetHandle: string) {
 	const targetProfileResp = await agent.getProfile({ actor: targetHandle })
-	const targetDid = targetProfileResp.data.did
-	const targetFollowers = await agent.app.bsky.graph.getFollowers({ actor: targetDid })
-	const targetFollowerDids = targetFollowers.data.followers.map(follower => follower.did)
-	const targetDids = [targetDid, ...targetFollowerDids]
-	for await (const did of targetDids) {
-		const blockResult = await blockUser(agent, did)
-		if (!blockResult) return false
+	const targetFollowersResp = await agent.app.bsky.graph.getFollowers({
+		actor: targetProfileResp.data.did
+	})
+	const targetProfiles = [targetProfileResp.data, ...targetFollowersResp.data.followers]
+	let allBlocked = true
+	for await (const targetProfile of targetProfiles) {
+		const blockResult = await blockUser(agent, targetProfile.did)
+		yield { handle: targetProfile.handle, blocked: blockResult }
+		allBlocked = allBlocked && blockResult
 	}
-	return true
+	return { allBlocked, blockCount: targetProfiles.length }
 }
 
 type BlockResponse = {

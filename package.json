@@ -12,7 +12,9 @@
 		"format": "prettier --write .",
 		"lint": "prettier --check . && eslint .",
 		"test:unit": "vitest",
-		"test": "npm run test:unit -- --run"
+		"test": "npm run test:unit -- --run",
+		"prepare": "husky",
+		"lint-staged": "lint-staged"
 	},
 	"devDependencies": {
 		"@eslint/compat": "^1.2.3",
@@ -23,6 +25,8 @@
 		"eslint-config-prettier": "^9.1.0",
 		"eslint-plugin-svelte": "^2.36.0",
 		"globals": "^15.0.0",
+		"husky": "^9.1.7",
+		"lint-staged": "^15.2.11",
 		"prettier": "^3.3.2",
 		"prettier-plugin-svelte": "^3.2.6",
 		"svelte": "^5.0.0",
@@ -34,5 +38,10 @@
 	},
 	"dependencies": {
 		"@atproto/api": "^0.13.20"
+	},
+	"lint-staged": {
+		"*.{js,ts,svelte}": [
+			"prettier --write"
+		]
 	}
 }

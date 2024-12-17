@@ -13,11 +13,17 @@ export default async function omegaBlock(agent: AtpAgent, targetHandle: string):
 	return true
 }
 
+type BlockResponse = {
+	uri: string
+	cid: string
+	validationStatus: string
+}
+
 async function blockUser(agent: AtpAgent, targetHandle: string): Promise<boolean> {
 	const targetProfile = await agent.getProfile({ actor: targetHandle })
 	const blockResp = (await agent.app.bsky.graph.block.create(
 		{ repo: agent.session?.did },
 		{ subject: targetProfile.data.did, createdAt: new Date().toISOString() }
-	)) as { uri: string; cid: string; validationStatus: string }
-	return blockResp['validationStatus'] === 'valid'
+	)) as BlockResponse
+	return blockResp.validationStatus === 'Valid'
 }
